@@ -1,4 +1,5 @@
 import type { BoardState, Player } from './alith';
+import { getBestMove } from './alith';
 
 // Direct fetch to Grok API to avoid Node.js dependencies in browser
 async function callGrokApi(prompt: string) {
@@ -14,16 +15,16 @@ async function callGrokApi(prompt: string) {
             messages: [
                 {
                     role: "system",
-                    content: `You are a competitive Tic Tac Toe player named Alith. 
-          You are playing against a human. 
-          Your goal is to win, or at least draw. 
+                    content: `You are a competitive Tic Tac Toe player named Alith.
+          You are playing against a human.
+          Your goal is to win, or at least draw.
           You will receive the board state as an array of 9 elements (0-8).
           'X' is the first player, 'O' is the second.
           Null represents an empty space.
-          
+
           You must output ONLY a JSON object with the following format:
           { "move": <index_0_to_8>, "comment": "<short_witty_comment>" }
-          
+
           Do not output markdown or any other text. Just the JSON.`
                 },
                 { role: "user", content: prompt }
@@ -42,12 +43,18 @@ async function callGrokApi(prompt: string) {
 
 export async function getAiMove(board: BoardState, aiSymbol: Player): Promise<{ move: number, comment: string }> {
     try {
+        // Calculate the mathematically perfect move to guide the AI
+        const perfectMove = getBestMove(board, aiSymbol, 'hard');
+
         const prompt = `
     Current Board: ${JSON.stringify(board)}
     You are playing as: ${aiSymbol}
     Available moves: ${board.map((c, i) => c === null ? i : null).filter(i => i !== null).join(', ')}
-    
-    Choose the best move to win or block the opponent.
+
+    STRATEGIC HINT: The mathematically optimal move to ensure a win or draw is index ${perfectMove}.
+
+    You should highly consider taking this move unless you see a guaranteed win elsewhere.
+    Make a witty comment about your move.
     `;
 
         const response = await callGrokApi(prompt);
@@ -60,9 +67,8 @@ export async function getAiMove(board: BoardState, aiSymbol: Player): Promise<{ 
         return result;
     } catch (error) {
         console.error("Error getting AI move from Grok:", error);
-        // Fallback to random valid move if API fails
-        const availableMoves = board.map((c, i) => c === null ? i : null).filter(i => i !== null) as number[];
-        const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-        return { move: randomMove, comment: "I'm having trouble thinking... let's try this." };
+        // Fallback to Minimax if API fails
+        const perfectMove = getBestMove(board, aiSymbol, 'hard');
+        return { move: perfectMove, comment: "I'm calculating purely on logic now." };
     }
 }

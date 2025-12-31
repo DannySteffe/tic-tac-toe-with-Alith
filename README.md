@@ -3,7 +3,6 @@
 
 A modern Tic Tac Toe web application featuring Alith, an AI opponent powered by xAI’s Grok.
 
-![Tic Tac Toe with Alith](https://placehold.co/600x400/1e293b/38bdf8?text=Tic+Tac+Toe+vs+Alith)
 
 ## Features
 
@@ -51,4 +50,5 @@ A modern Tic Tac Toe web application featuring Alith, an AI opponent powered by 
    ```
 
 Built by [DannySteffe](https://github.com/DannySteffe)
+
 
